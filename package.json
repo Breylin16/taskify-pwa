@@ -1,0 +1,16 @@
+{
+  "name": "proyecto-taskify",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "serve -s public",
+    "build": "echo 'No se necesita build para estáticos'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
+  },
+  "devDependencies": {
+    "vercel": "^32.2.1"
+  }
+}

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Taskify: Organiza tus tareas de forma simple y offline">
+  <meta name="theme-color" content="#2c3e50">
+  
+  <!-- PWA Config -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <title>Taskify | Gestor de Tareas</title>
+</head>
+<body class="bg-light">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="#">
+        <i class="bi bi-check-circle-fill text-primary me-2"></i>Taskify
+      </a>
+      <div id="userSection" class="d-flex align-items-center">
+        <button id="navProfileBtn" class="btn btn-link text-decoration-none me-2 d-none">
+          <i class="bi bi-person-circle me-1"></i>
+          <span id="navUserName"></span>
+        </button>
+        <button id="navLogoutBtn" class="btn btn-outline-danger btn-sm d-none">
+          <i class="bi bi-box-arrow-right"></i> Salir
+        </button>
+      
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenedor principal -->
+  <main class="container mt-5 pt-4" id="app">
+    <!-- El contenido se inyectará aquí via JS -->
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-3 bg-white text-center text-muted small fixed-bottom">
+    <p class="mb-0">© 2025 Taskify - Proyecto académico</p>
+  </footer>
+
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- App Script -->
+  <script type="module">
+    import { renderAuthScreen } from './login.js';
+    
+    // Función para renderizar el perfil
+    async function renderProfileScreen() {
+      const { renderProfile } = await import('./tasks.js');
+      renderProfile();
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      
+      // Manejar autenticación inicial
+      const user = localStorage.getItem('taskify_user');
+      if (user) {
+        const userData = JSON.parse(user);
+        updateNavbar(userData);
+        window.location.hash = '#tasks';
+      } else {
+        window.location.hash = '#login';
+      }
+      
+      // Configurar evento del botón de perfil
+      document.getElementById('navProfileBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.hash = '#profile';
+      });
+    });
+
+    // ✅ Registrar el Service Worker DESPUÉS de cargar lo crítico
+    await registerServiceWorker();
+
+  // Función para registrar el SW
+  async function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register('/service-worker.js');
+        console.log('✅ SW registrado con éxito. Scope:', registration.scope);
+      } catch (err) {
+        console.error('❌ Error al registrar SW:', err);
+      }
+    }
+  }
+ 
+    // Función para actualizar el navbar
+    function updateNavbar(userData) {
+      const navUserName = document.getElementById('navUserName');
+      const navProfileBtn = document.getElementById('navProfileBtn');
+      const navLogoutBtn = document.getElementById('navLogoutBtn');
+      
+      if (navUserName) navUserName.textContent = userData.name;
+      if (navProfileBtn) navProfileBtn.classList.remove('d-none');
+      if (navLogoutBtn) navLogoutBtn.classList.remove('d-none');
+    }
+    
+    // Eventos de navegación
+    window.addEventListener('hashchange', async () => {
+      const app = document.getElementById('app');
+      
+      if (window.location.hash === '#login') {
+        renderAuthScreen();
+      } else if (window.location.hash === '#tasks') {
+        const { renderTasksScreen } = await import('./tasks.js');
+        renderTasksScreen();
+      } else if (window.location.hash === '#profile') {
+        await renderProfileScreen();
+      }
+    });
+    
+    // Evento de logout
+    document.getElementById('navLogoutBtn')?.addEventListener('click', () => {
+      localStorage.removeItem('taskify_user');
+      document.getElementById('navProfileBtn').classList.add('d-none');
+      document.getElementById('navLogoutBtn').classList.add('d-none');
+      window.location.hash = '#login';
+    });
+    
+    // Disparar evento inicial
+    window.dispatchEvent(new Event('hashchange'));
+  </script>
+
+</body>
+</html>
