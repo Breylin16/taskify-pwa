@@ -30,6 +30,6 @@ Brindar una herramienta **simple pero potente** para estudiantes o cualquier per
 
 ---
 
-### 🚀 **¡Taskify está lista para desplegarse en [Vercel](https://vercel.com/)!**  
+### 🚀 **¡Taskify está lista para desplegarse en [Vercel](taskify-pwa-breylinsanchez.vercel.app)!**  
 Usable desde cualquier dispositivo 📱💻
 
